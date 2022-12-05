@@ -1,6 +1,6 @@
 ## flutter_split_view
 
-A Navigator 2.0 based Flutter widget that automatically splits the screen into two views based on available space.
+A Navigator 2.0 based Flutter widget that automatically splits the screen into two views based on available space with the ability to make the width of the views adjustable.
 
 ![Demo](https://raw.githubusercontent.com/TerminalStudio/flutter_split_view/main/media/demo.gif?token=GHSAT0AAAAAABIZ4MCR753WLCN4QECYUMSSYPJPDSQ)
 
@@ -23,6 +23,25 @@ CupertinoApp(
     home: SplitView.cupertino(
         child: MainPage(),
     ),
+);
+```
+
+#### Resizable Width
+
+```dart
+SplitView.material(
+    breakpoint: 840,
+    initialWeight: 0.4,
+    isResizable: true,
+    minWidth: 320,
+    maxWidth: 640,
+    splitterWidth: 8,
+    splitterColor: Theme.of(context).scaffoldBackgroundColor,
+    activeSplitterColor: Theme.of(context).scaffoldBackgroundColor,
+    grip: const Grip(),
+    activeGrip: const Grip.active(),
+    placeholder: const PlaceholderPage(),
+    child: const MainPage(),
 );
 ```
 
