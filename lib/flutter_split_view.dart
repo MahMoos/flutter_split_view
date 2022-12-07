@@ -81,6 +81,7 @@ class SplitView extends StatefulWidget {
     Key? key,
     required this.child,
     this.breakpoint = _kDefaultBreakpoint,
+    this.secondaryChild,
     this.placeholder,
     this.title,
     this.initialWeight = defaultInitialWeight,
@@ -103,6 +104,7 @@ class SplitView extends StatefulWidget {
     Key? key,
     required this.child,
     this.breakpoint = _kDefaultBreakpoint,
+    this.secondaryChild,
     this.placeholder,
     this.title,
     this.initialWeight = defaultInitialWeight,
@@ -125,6 +127,7 @@ class SplitView extends StatefulWidget {
     Key? key,
     required this.child,
     this.breakpoint = _kDefaultBreakpoint,
+    this.secondaryChild,
     this.placeholder,
     this.title,
     this.initialWeight = defaultInitialWeight,
@@ -140,7 +143,7 @@ class SplitView extends StatefulWidget {
     this.grip,
     this.activeGrip,
     required this.pageBuilder,
-  }) : assert(initialWeight >= 0.0 && initialWeight <= 1.0),
+  })  : assert(initialWeight >= 0.0 && initialWeight <= 1.0),
         super(key: key);
 
   static SplitViewState of(BuildContext context) {
@@ -161,6 +164,10 @@ class SplitView extends StatefulWidget {
   /// Initial weight of the main view width to the whole view width
   /// value must be between 0.0 - 1.0
   final double initialWeight;
+
+  /// Secondary page to show in the secondary view
+  /// This page will be pushed automatically
+  final Widget? secondaryChild;
 
   /// Placeholder widget to show when the secondary view is visible and no page
   /// is selected.
@@ -212,7 +219,7 @@ class SplitViewState extends State<SplitView> {
 
   final _pageConfigs = <_PageConfig>[];
 
-  var isSplitted = false;
+  var isSplit = false;
 
   late SplitViewController _controller;
   late Color _gripColor;
@@ -235,6 +242,9 @@ class SplitViewState extends State<SplitView> {
         widget.controller != null ? widget.controller! : SplitViewController();
     _controller._init(2);
     _controller._weights[0] = widget.initialWeight;
+    if (widget.secondaryChild != null) {
+      setSecondary(widget.secondaryChild!);
+    }
   }
 
   @override
@@ -245,10 +255,20 @@ class SplitViewState extends State<SplitView> {
   }
 
   @override
+  void didUpdateWidget(covariant SplitView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.secondaryChild != null) {
+      setSecondary(widget.secondaryChild!);
+    } else {
+      popUntil(0);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        isSplitted = constraints.maxWidth >= widget.breakpoint;
+        isSplit = constraints.maxWidth >= widget.breakpoint;
         double viewsWidth = constraints.maxWidth - widget.splitterWidth;
         if (widget.maxWidth != null &&
             viewsWidth * _controller.weights[0]! > widget.maxWidth!) {
@@ -258,7 +278,7 @@ class SplitViewState extends State<SplitView> {
             viewsWidth * _controller.weights[0]! < widget.minWidth!) {
           _controller._weights[0] = widget.minWidth! / viewsWidth;
         }
-        if (!isSplitted) {
+        if (!isSplit) {
           return Navigator(
             pages: _pages,
             onPopPage: _onPopPage,
@@ -406,6 +426,7 @@ class SplitViewState extends State<SplitView> {
 
   /// Pops the pages until the [index]-th is reached.
   void popUntil(int index) {
+    print('poping');
     if (index < 0 || index >= pageCount) {
       throw ArgumentError('Index $index is out of bounds');
     }
@@ -442,7 +463,7 @@ class SplitViewState extends State<SplitView> {
   }
 
   bool get isSecondaryVisible {
-    return isSplitted;
+    return isSplit;
   }
 
   void _updatePages() {
